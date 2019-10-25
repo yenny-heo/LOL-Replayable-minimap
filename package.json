@@ -2,9 +2,13 @@
   "name": "replay-module",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://kr.api.riotgames.com/lol/match/v4/timelines/by-match",
   "dependencies": {
+    "axios": "^0.19.0",
+    "konva": "^4.0.16",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "react-konva": "^16.10.1-0",
     "react-scripts": "3.2.0"
   },
   "scripts": {
