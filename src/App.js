@@ -1,10 +1,19 @@
 import React from 'react';
 import axios from 'axios';
-import { Stage, Layer, Image, Circle, Rect, Group } from 'react-konva';
+import { Stage, Layer, Image, Circle, Rect } from 'react-konva';
 import './App.css';
+import Summoner from './Summoner'
 
-const matchID = "3931756472";
-const rad = 15;
+const matchID = "3938592627";
+
+let turretDestroy={
+  blue:{
+    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
+  },
+  red:{
+    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
+  }
+}
 
 class App extends React.Component {
 
@@ -16,8 +25,7 @@ class App extends React.Component {
   componentDidMount() {
     this._callAPI();
     this._renderImage();
-
-    //this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
+    this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
   }
 
   componentWillUnmount() {
@@ -25,55 +33,37 @@ class App extends React.Component {
   }
 
   _callAPI = () => {
-    axios.get(`/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
+    axios.get(`timelines/by-match/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
       .then(res => { console.log(res.data.frames); this.setState({ data: res.data.frames }); })
       .catch(err => console.log(err));
-  }
+    
+    axios.get(`matches/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
+      .then(res => { console.log(res.data.participants); this.setState({  party: res.data.participants }); })
+      .catch(err => console.log(err));
+    }
+
+  
 
   _renderImage = () => {
     const map = new window.Image();
-    map.src = "./images.jpeg"
-    map.onload = () => {
-      this.setState({
-        map: map
-      })
-    }
+    map.src = "./map.png"
+
     const blueTurret = new window.Image();
-    blueTurret.src="./blue_turret.png"
-    blueTurret.onload = () => {
-      this.setState({
-        blueTurret:blueTurret
-      })
-    }
+    blueTurret.src = "./blue_turret.png"
+
     const redTurret = new window.Image();
-    redTurret.src="./red_turret.png"
+    redTurret.src = "./red_turret.png"
     redTurret.onload = () => {
       this.setState({
-        redTurret:redTurret
+        map: map,
+        blueTurret: blueTurret,
+        redTurret: redTurret
       })
     }
-    console.log(redTurret);
+
     this._createTurret();
   }
 
-  _renderSummoner = () => {
-    const { data, time } = this.state;
-    let i = time;
-    let color;
-    if (!data) return null;
-    console.log(time, data.length);
-    if (time >= data.length - 1) clearInterval(this.interval);
-
-    let summoners = Object.keys(data[i].participantFrames).map(key => {
-      //레드팀 블루팀
-      if (data[i].participantFrames[key].participantId <= 5) color = "blue";
-      else color = "red";
-      return <Circle x={data[i].participantFrames[key].position.x / 25}
-        y={Math.abs(data[i].participantFrames[key].position.y / 25 - 600)}
-        radius={rad} fill={color} stroke="black" key={key}></Circle>
-    })
-    return summoners;
-  }
 
   _createTurret = () => {
     const Turret = {
@@ -103,7 +93,7 @@ class App extends React.Component {
       red: {
         TOP_LANE: {
           OUTER_TURRET: { x: 170, y: 580 },
-          INNER_TURRET: { x: 310, y: 555 },
+          INNER_TURRET: { x: 310, y: 560 },
           BASE_TURRET: { x: 410, y: 565 },
           UNDEFINED_TURRET: { x: 450, y: 550 }
         },
@@ -134,27 +124,47 @@ class App extends React.Component {
       return Object.keys(Turret[team]).map((lane) => {
         return Object.keys(Turret[team][lane]).map((t, i) => {
           let color, image;
-          if(team === "blue") { color = "DeepSkyBlue"; image = this.state.blueTurret;  }
+          //팀에 따른 포탑, 억제기 외형과 색
+          if (team === "blue") { color = "DeepSkyBlue"; image = this.state.blueTurret; }
           else { color = "FireBrick"; image = this.state.redTurret; }
-          if (t === "UNDEFINED_TURRET" || t === "nexus")
-          return <Circle x={Turret[team][lane][t].x} y={Math.abs(Turret[team][lane][t].y - 600)} radius={13} fill={color} stroke="black" key={i}></Circle>
-        else return <Rect x={Turret[team][lane][t].x} y={Math.abs(Turret[team][lane][t].y - 600)} height={30} width={20} fillPatternImage={image} key={i}></Rect>
+          //파괴된 포탑은 렌더링 X
+          if(turretDestroy[team][lane] > i)
+            return null;
+          else if (t === "UNDEFINED_TURRET" || t === "nexus")
+            return <Circle x={Turret[team][lane][t].x} y={Math.abs(Turret[team][lane][t].y - 600)} radius={13} fill={color} stroke="black" key={i}></Circle>
+          else return <Rect x={Turret[team][lane][t].x} y={Math.abs(Turret[team][lane][t].y - 600)} height={35} width={25} fillPatternImage={image} key={i}></Rect>
         })
       })
     })
     return turrets;
   }
 
+  _turretEvent = () => {
+    const { data, time } = this.state;
+    let event = data[time].events;
+    for(let i=0; i< event.length; i++){
+      if(event[i].type === "BUILDING_KILL"){
+        if(event[i].teamId === 100)
+          turretDestroy.blue[event[i].laneType]++;
+        else turretDestroy.red[event[i].laneType]++;
+      }
+    }
+    return this._renderTurret();
+  }
+
   render() {
     return (
-      <Stage width={window.innerWidth} height={window.innerHeight}>
-        {(this.state.data && this.state.Turret) ?
-          <Layer>
-            <Image image={this.state.map} width={600} height={600}></Image>
-            {this._renderTurret()}
-            {this._renderSummoner()}
-          </Layer> : null}
-      </Stage>
+      <div className="Map">
+        <span className="Title">❤️L O L - R E P L A Y❤️</span>
+        <Stage width={window.innerWidth} height={window.innerHeight}>
+          {(this.state.data && this.state.Turret && this.state.party) ?
+            <Layer x={100}>
+              <Image image={this.state.map} width={600} height={600}></Image>
+              <Summoner interval={this.interval} data={this.state.data} time={this.state.time} party={this.state.party}></Summoner>
+              {this._turretEvent()}
+            </Layer> : null}
+        </Stage>
+      </div>
     );
   }
 }
