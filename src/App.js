@@ -3,14 +3,15 @@ import axios from 'axios';
 import { Stage, Layer, Image, Circle, Rect } from 'react-konva';
 import './App.css';
 import Summoner from './Summoner'
+import Timeline from './Timeline'
 
 const matchID = "3938592627";
 
-let turretDestroy={
-  blue:{
+let turretDestroy = {
+  blue: {
     TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
   },
-  red:{
+  red: {
     TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
   }
 }
@@ -19,13 +20,17 @@ class App extends React.Component {
 
   state = {
     image: "",
-    time: 0
+    time: 0,
+    timeline: ""
   }
 
   componentDidMount() {
     this._callAPI();
     this._renderImage();
-    this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
+    setTimeout(() => {
+      this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
+    }, 2000);
+    
   }
 
   componentWillUnmount() {
@@ -34,15 +39,38 @@ class App extends React.Component {
 
   _callAPI = () => {
     axios.get(`timelines/by-match/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
-      .then(res => { console.log(res.data.frames); this.setState({ data: res.data.frames }); })
+      .then(res => { console.log(res.data.frames); this.setState({ data: res.data.frames }); return this._scanEvent(res.data.frames);})
+      .then(timeline => { this.setState({timeline: timeline});  })
       .catch(err => console.log(err));
-    
+
     axios.get(`matches/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
-      .then(res => { console.log(res.data.participants); this.setState({  party: res.data.participants }); })
+      .then(res => { console.log(res.data); this.setState({ party: res.data }); })
       .catch(err => console.log(err));
+  }
+
+  _scanEvent = (data) => {
+    let timeline = new Array(100);
+    for(let i=0; i<timeline.length; i++){
+      timeline[i] = new Array();
     }
 
-  
+    for (let i = 0; i < data.length; i++) {
+      let k = 0;
+      for (let j = 0; j < data[i].events.length; j++) {
+        const curEvent = data[i].events[j];
+        if (curEvent.type === "BUILDING_KILL"){
+          timeline[i][k] = { type: "BUILDING_KILL", team: curEvent.teamId };
+          k++;
+        }
+        else if(curEvent.type === "CHAMPION_KILL"){
+          timeline[i][k] = {type: "CHAMPION_KILL", killer: curEvent.killerId, victim: curEvent.victimId};
+          k++;
+        }
+      }
+    }
+    return timeline;
+  }
+
 
   _renderImage = () => {
     const map = new window.Image();
@@ -119,7 +147,6 @@ class App extends React.Component {
 
   _renderTurret = () => {
     const { Turret } = this.state;
-
     let turrets = Object.keys(Turret).map((team) => {
       return Object.keys(Turret[team]).map((lane) => {
         return Object.keys(Turret[team][lane]).map((t, i) => {
@@ -128,7 +155,7 @@ class App extends React.Component {
           if (team === "blue") { color = "DeepSkyBlue"; image = this.state.blueTurret; }
           else { color = "FireBrick"; image = this.state.redTurret; }
           //파괴된 포탑은 렌더링 X
-          if(turretDestroy[team][lane] > i)
+          if (turretDestroy[team][lane] > i)
             return null;
           else if (t === "UNDEFINED_TURRET" || t === "nexus")
             return <Circle x={Turret[team][lane][t].x} y={Math.abs(Turret[team][lane][t].y - 600)} radius={13} fill={color} stroke="black" key={i}></Circle>
@@ -142,9 +169,9 @@ class App extends React.Component {
   _turretEvent = () => {
     const { data, time } = this.state;
     let event = data[time].events;
-    for(let i=0; i< event.length; i++){
-      if(event[i].type === "BUILDING_KILL"){
-        if(event[i].teamId === 100)
+    for (let i = 0; i < event.length; i++) {
+      if (event[i].type === "BUILDING_KILL") {
+        if (event[i].teamId === 100)
           turretDestroy.blue[event[i].laneType]++;
         else turretDestroy.red[event[i].laneType]++;
       }
@@ -154,16 +181,27 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="Map">
-        <span className="Title">❤️L O L - R E P L A Y❤️</span>
-        <Stage width={window.innerWidth} height={window.innerHeight}>
-          {(this.state.data && this.state.Turret && this.state.party) ?
-            <Layer x={100}>
-              <Image image={this.state.map} width={600} height={600}></Image>
-              <Summoner interval={this.interval} data={this.state.data} time={this.state.time} party={this.state.party}></Summoner>
-              {this._turretEvent()}
-            </Layer> : null}
-        </Stage>
+      <div className="Container">
+        <span className="Title">L O L - M I N I M A P - R E P L A Y</span>
+        {(this.state.data && this.state.Turret && this.state.party && this.state.timeline) ?
+        <div className="Map">
+          <Stage width={600} height={600}>
+              <Layer>
+                <Image image={this.state.map} width={600} height={600}></Image>
+                <Summoner 
+                interval={this.interval} 
+                data={this.state.data} 
+                time={this.state.time} 
+                party={this.state.party.participants}></Summoner>
+                {this._turretEvent()}
+              </Layer>
+          </Stage>
+          <Timeline 
+          timeline={this.state.timeline} 
+          time={this.state.time} 
+          gamelength={this.state.data.length-1}
+          party={this.state.party}></Timeline>
+        </div> : null}
       </div>
     );
   }

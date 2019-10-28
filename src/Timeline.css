@@ -1,0 +1,49 @@
+.Container2{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-left: 30px;
+}
+.TimelineTitle{
+    color:forestgreen;
+    margin-bottom: 10px;
+  }  
+
+.Timeline{
+    height: 300px;
+    width: 300px;
+    border: 1px solid forestgreen;
+    flex-direction: column;
+    overflow:scroll;
+    background: black;
+  }
+
+  .New{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid forestgreen;
+    height: 40px;
+    color: wheat;
+  }
+
+  .Old{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid forestgreen;
+    height: 40px;
+    color: dimgray;
+  }
+
+  .BlueTeam{
+    border: 1px solid blue;
+    width: 20px;
+    height: 20px;
+  }
+
+  .RedTeam{
+    border: 1px solid firebrick;
+    width: 20px;
+    height: 20px;
+  }
