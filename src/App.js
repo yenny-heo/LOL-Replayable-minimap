@@ -6,6 +6,8 @@ import Summoner from './Summoner'
 import Timeline from './Timeline'
 
 const matchID = "3938592627";
+let blueScore = [];
+let redScore = [];
 
 let turretDestroy = {
   blue: {
@@ -30,7 +32,7 @@ class App extends React.Component {
     setTimeout(() => {
       this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
     }, 2000);
-    
+
   }
 
   componentWillUnmount() {
@@ -39,8 +41,8 @@ class App extends React.Component {
 
   _callAPI = () => {
     axios.get(`timelines/by-match/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
-      .then(res => { console.log(res.data.frames); this.setState({ data: res.data.frames }); return this._scanEvent(res.data.frames);})
-      .then(timeline => { this.setState({timeline: timeline});  })
+      .then(res => { console.log(res.data.frames); this.setState({ data: res.data.frames }); return this._scanEvent(res.data.frames); })
+      .then(timeline => { this.setState({ timeline: timeline }); })
       .catch(err => console.log(err));
 
     axios.get(`matches/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
@@ -50,23 +52,28 @@ class App extends React.Component {
 
   _scanEvent = (data) => {
     let timeline = new Array(100);
-    for(let i=0; i<timeline.length; i++){
+    for (let i = 0; i < timeline.length; i++) {
       timeline[i] = new Array();
     }
 
     for (let i = 0; i < data.length; i++) {
       let k = 0;
+      blueScore[i] = 0;
+      redScore[i] = 0;
       for (let j = 0; j < data[i].events.length; j++) {
         const curEvent = data[i].events[j];
-        if (curEvent.type === "BUILDING_KILL"){
+        if (curEvent.type === "BUILDING_KILL") {
           timeline[i][k] = { type: "BUILDING_KILL", team: curEvent.teamId };
           k++;
         }
-        else if(curEvent.type === "CHAMPION_KILL"){
-          timeline[i][k] = {type: "CHAMPION_KILL", killer: curEvent.killerId, victim: curEvent.victimId};
+        else if (curEvent.type === "CHAMPION_KILL") {
+          timeline[i][k] = { type: "CHAMPION_KILL", killer: curEvent.killerId, victim: curEvent.victimId };
           k++;
+          if (curEvent.killerId <= 5) blueScore[i]++;
+          else redScore[i]++;
         }
       }
+      if (i != 0) { blueScore[i] += blueScore[i - 1]; redScore[i] += redScore[i - 1]; }
     }
     return timeline;
   }
@@ -179,29 +186,47 @@ class App extends React.Component {
     return this._renderTurret();
   }
 
+  _score = (team) => {
+    if (team === "BlueTeam")
+      blueScore++;
+    else redScore++;
+
+  }
+
   render() {
     return (
-      <div className="Container">
-        <span className="Title">L O L - M I N I M A P - R E P L A Y</span>
+      <div>
         {(this.state.data && this.state.Turret && this.state.party && this.state.timeline) ?
-        <div className="Map">
-          <Stage width={600} height={600}>
-              <Layer>
-                <Image image={this.state.map} width={600} height={600}></Image>
-                <Summoner 
-                interval={this.interval} 
-                data={this.state.data} 
-                time={this.state.time} 
-                party={this.state.party.participants}></Summoner>
-                {this._turretEvent()}
-              </Layer>
-          </Stage>
-          <Timeline 
-          timeline={this.state.timeline} 
-          time={this.state.time} 
-          gamelength={this.state.data.length-1}
-          party={this.state.party}></Timeline>
-        </div> : null}
+          <div className="Container">
+            <span className="Title">L O L - M I N I M A P - R E P L A Y</span>
+            <div className="Map">
+              <Stage width={600} height={600}>
+                <Layer>
+                  <Image image={this.state.map} width={600} height={600}></Image>
+                  <Summoner
+                    interval={this.interval}
+                    data={this.state.data}
+                    time={this.state.time}
+                    party={this.state.party.participants}></Summoner>
+                  {this._turretEvent()}
+                </Layer>
+              </Stage>
+              <Timeline
+                timeline={this.state.timeline}
+                time={this.state.time}
+                gamelength={this.state.data.length - 1}
+                party={this.state.party}></Timeline>
+            </div>
+            <div className="Score">
+              <div className="BlueScore">
+                {blueScore[this.state.time]}
+              </div>
+              ⠀<img src="./score.png" alt="score" className="ScoreIcon"></img>⠀
+              <div className="RedScore">
+                {redScore[this.state.time]}</div>
+              </div>
+          </div>
+          : null}
       </div>
     );
   }

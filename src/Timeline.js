@@ -1,6 +1,7 @@
 import React from 'react';
 import './Timeline.css'
-import { identifier } from '@babel/types';
+
+let blueScore = 0, redScore = 0;
 
 class Timeline extends React.Component {
 
@@ -31,6 +32,8 @@ class Timeline extends React.Component {
                     let victimChamp = party.participants[t.victim - 1].championId;
                     let killerSrc = `./icon/${killerChamp}.png`
                     let victimSrc = `./icon/${victimChamp}.png`
+                    let killerName = party.participantIdentities[t.killer - 1].player.summonerName;
+                    let victimName = party.participantIdentities[t.victim - 1].player.summonerName;
                     let killerClass, victimClass;
                     if (t.killer <= 5) {
                         killerClass = "BlueTeam"; victimClass = "RedTeam";
@@ -38,18 +41,25 @@ class Timeline extends React.Component {
                     else {
                         killerClass = "RedTeam"; victimClass = "BlueTeam";
                     }
-                    if (time === 99 - i)
+                    if (time === 99 - i) {
                         return <div key={j} className="New">{99 - i}분:
                         <img src={killerSrc} alt="killer" className={killerClass}></img>
-                            Killed
+                        {killerName}
+                        ⠀Killed⠀
                         <img src={victimSrc} alt="victim" className={victimClass}></img>
+                        {victimName}
                         </div>
-                    else return <div key={j} className="Old">{99 - i}분:
-                    <img src={killerSrc} alt="killer" className={killerClass}></img>
-                        Killed
-                    <img src={victimSrc} alt="victim" className={victimClass}></img>
-                    </div>
-                }
+                    }
+                    else {
+                        return <div key={j} className="Old">{99 - i}분:
+                        <img src={killerSrc} alt="killer" className={killerClass}></img>
+                        {killerName}
+                        ⠀Killed⠀
+                        <img src={victimSrc} alt="victim" className={victimClass}></img>
+                        {victimName}
+                        </div>
+                    }
+                 }
             })
         })
         return timelinelist;
@@ -65,6 +75,13 @@ class Timeline extends React.Component {
         }
 
     }
+
+    _score = (team) => {
+        if(team === "BlueTeam")
+          blueScore++;
+        else redScore++;
+    }
+    
 
 
     render() {

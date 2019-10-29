@@ -10,8 +10,8 @@
   }  
 
 .Timeline{
-    height: 300px;
-    width: 300px;
+    height: 500px;
+    width: 400px;
     border: 1px solid forestgreen;
     flex-direction: column;
     overflow:scroll;
@@ -20,30 +20,33 @@
 
   .New{
     display: flex;
-    justify-content: center;
     align-items: center;
     border-bottom: 1px solid forestgreen;
     height: 40px;
     color: wheat;
+    margin: 0 10px 0 10px;
   }
 
   .Old{
     display: flex;
-    justify-content: center;
     align-items: center;
     border-bottom: 1px solid forestgreen;
     height: 40px;
     color: dimgray;
+    margin: 0 10px 0 10px;
   }
 
   .BlueTeam{
-    border: 1px solid blue;
-    width: 20px;
-    height: 20px;
+    border: 2px solid blue;
+    width: 25px;
+    height: 25px;
+    border-radius: 15px;
   }
 
   .RedTeam{
-    border: 1px solid firebrick;
-    width: 20px;
-    height: 20px;
+    border: 2px solid firebrick;
+    width: 25px;
+    height: 25px;
+    border-radius: 15px;
   }
+
