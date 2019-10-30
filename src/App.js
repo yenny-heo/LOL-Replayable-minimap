@@ -5,16 +5,19 @@ import './App.css';
 import Summoner from './Summoner'
 import Timeline from './Timeline'
 
-const matchID = "3938592627";
+const matchID = "3931756472";
+const timeInterval = 2000;
 let blueScore = [];
 let redScore = [];
 
 let turretDestroy = {
   blue: {
-    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
+    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0,
+    INHIBITOR: false
   },
   red: {
-    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0
+    TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0,
+    INHIBITOR: false
   }
 }
 
@@ -31,7 +34,7 @@ class App extends React.Component {
     this._renderImage();
     setTimeout(() => {
       this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
-    }, 2000);
+    }, timeInterval);
 
   }
 
@@ -178,20 +181,15 @@ class App extends React.Component {
     let event = data[time].events;
     for (let i = 0; i < event.length; i++) {
       if (event[i].type === "BUILDING_KILL") {
-        if (event[i].teamId === 100)
+        if (event[i].teamId === 100){
           turretDestroy.blue[event[i].laneType]++;
+        }
         else turretDestroy.red[event[i].laneType]++;
       }
     }
     return this._renderTurret();
   }
 
-  _score = (team) => {
-    if (team === "BlueTeam")
-      blueScore++;
-    else redScore++;
-
-  }
 
   render() {
     return (

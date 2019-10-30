@@ -1,7 +1,6 @@
 import React from 'react';
 import './Timeline.css'
 
-let blueScore = 0, redScore = 0;
 
 class Timeline extends React.Component {
 
@@ -75,13 +74,6 @@ class Timeline extends React.Component {
         }
 
     }
-
-    _score = (team) => {
-        if(team === "BlueTeam")
-          blueScore++;
-        else redScore++;
-    }
-    
 
 
     render() {
