@@ -4,6 +4,7 @@ import { Stage, Layer, Image, Circle, Rect } from 'react-konva';
 import './App.css';
 import Summoner from './Summoner'
 import Timeline from './Timeline'
+import Itemlist from './Itemlist'
 
 const matchID = "3931756472";
 const timeInterval = 2000;
@@ -13,11 +14,11 @@ let redScore = [];
 let turretDestroy = {
   blue: {
     TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0,
-    INHIBITOR: false
+    INHIBIT_CNT: 0
   },
   red: {
     TOP_LANE: 0, MID_LANE: 0, BOT_LANE: 0,
-    INHIBITOR: false
+    INHIBIT_CNT: 0
   }
 }
 
@@ -33,8 +34,8 @@ class App extends React.Component {
     this._callAPI();
     this._renderImage();
     setTimeout(() => {
-      this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), 2000);
-    }, timeInterval);
+      this.interval = setInterval(() => this.setState({ time: this.state.time + 1 }), timeInterval);
+    }, 2000);
 
   }
 
@@ -76,7 +77,7 @@ class App extends React.Component {
           else redScore[i]++;
         }
       }
-      if (i != 0) { blueScore[i] += blueScore[i - 1]; redScore[i] += redScore[i - 1]; }
+      if (i !== 0) { blueScore[i] += blueScore[i - 1]; redScore[i] += redScore[i - 1]; }
     }
     return timeline;
   }
@@ -179,14 +180,34 @@ class App extends React.Component {
   _turretEvent = () => {
     const { data, time } = this.state;
     let event = data[time].events;
+    //억제기 재생성
+    if(turretDestroy.blue["INHIBIT_CNT"] === 6){
+      turretDestroy.blue["MID_LANE"] = 3;
+      turretDestroy.blue["INHIBIT_CNT"] = 0;
+    }
+    //억제기 재생성
+    if(turretDestroy.red["INHIBIT_CNT"] === 6){
+      turretDestroy.red["MID_LANE"] = 3;
+      turretDestroy.red["INHIBIT_CNT"] = 0;
+    }
     for (let i = 0; i < event.length; i++) {
       if (event[i].type === "BUILDING_KILL") {
         if (event[i].teamId === 100){
           turretDestroy.blue[event[i].laneType]++;
         }
-        else turretDestroy.red[event[i].laneType]++;
+        else {
+          turretDestroy.red[event[i].laneType]++;
+        }
       }
     }
+    //억제기 재생성 카운트
+    if(turretDestroy.blue["MID_LANE"] === 4)
+      turretDestroy.blue["INHIBIT_CNT"]++;
+
+    //억제기 재생성 카운트
+    if(turretDestroy.red["MID_LANE"] === 4)
+      turretDestroy.red["INHIBIT_CNT"]++;
+
     return this._renderTurret();
   }
 
@@ -198,6 +219,10 @@ class App extends React.Component {
           <div className="Container">
             <span className="Title">L O L - M I N I M A P - R E P L A Y</span>
             <div className="Map">
+              <Itemlist
+              party={this.state.party}
+              time={this.state.time}
+              data={this.state.data}></Itemlist>
               <Stage width={600} height={600}>
                 <Layer>
                   <Image image={this.state.map} width={600} height={600}></Image>

@@ -1,0 +1,48 @@
+.Container3{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 600px;
+    width: 400px;
+    margin-top: 40px;
+
+}
+
+.ChampImages{
+    display: flex;
+    flex-direction: column;
+}
+
+.ChampImages .ChampBlueIcon{
+    height: 35px;
+    width: 35px;
+    margin-bottom: 5px;
+    border: 1px solid blue;
+}
+
+.ChampImages .ChampRedIcon{
+    height: 35px;
+    width: 35px;
+    margin-bottom: 5px;
+    border: 1px solid firebrick;
+}
+
+.ItemLists{
+    display: flex;
+    flex-direction: column;
+    margin-left: 15px;
+    border-bottom: 2px solid black;
+}
+
+.ChampItem{
+    display: flex;
+    flex-direction: row;
+    border: 2px solid black;
+    border-bottom: none;
+}
+
+.Item{
+    height: 35px;
+    width: 35px;
+    margin: 0 5px 5px 0;
+}

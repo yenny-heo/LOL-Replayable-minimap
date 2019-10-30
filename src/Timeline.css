@@ -2,7 +2,6 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin-left: 30px;
 }
 .TimelineTitle{
     color:forestgreen;
