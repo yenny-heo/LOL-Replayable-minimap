@@ -1,8 +1,11 @@
 import React from 'react';
+import axios from 'axios';
 import { Group, Circle } from 'react-konva';
 
 const rad = 20;
 let images = {};
+
+let championInfo = "";
 class Summoner extends React.Component {
 
     state={
@@ -12,11 +15,34 @@ class Summoner extends React.Component {
         this._summonerImage();
     }
 
+    // _callAPI = () => {
+    //     axios.get("http://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
+    //     .then(res => {console.log(res.data.data); championInfo = res.data.data; return this._getChampId() })
+    //     .then(err => console.log(err));
+    // }
+
+    // _getChampId = () => { 
+    //     const { party } = this.props;
+    //     for(var i = 0; i < 10; i++){
+    //         party[i].championId += "";
+    //         for(var j in championInfo){
+    //             console.log(championInfo[j].key === party[i].championId);
+    //             if(championInfo[j].key === party[i].championId){
+    //                 console.log(j);
+    //                 images[i] = new Image();
+    //                 images[i].src = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${j}.png`;
+
+    //                 if(i === 9) images[i].onload = () => {this.setState({image: true})};
+    //             }
+    //         }
+    //     }
+    // }
+
     _summonerImage = () => {
         const { party } = this.props;
         for (var i = 0; i < 10; i++) {
             images[i] = new Image();
-            images[i].src = `./icon/${party[i].championId}.png`;
+            images[i].src = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${party[i]}.png`;
             //마지막 이미지가 로드 되었을 때 Render
             if(i === 9) images[i].onload = () => {this.setState({image: true})};
         }

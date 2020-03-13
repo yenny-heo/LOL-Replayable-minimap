@@ -6,8 +6,11 @@ import Summoner from './Summoner'
 import Timeline from './Timeline'
 import Itemlist from './Itemlist'
 
-const matchID = "3931756472";
+const matchID = "4198162101";
 const timeInterval = 2000;
+
+let championInfo = "";
+let champions = [];
 let blueScore = [];
 let redScore = [];
 
@@ -50,8 +53,30 @@ class App extends React.Component {
       .catch(err => console.log(err));
 
     axios.get(`matches/${matchID}?api_key=RGAPI-9913435b-4378-4fd7-b372-51e98788c1ac`)
-      .then(res => { console.log(res.data); this.setState({ party: res.data }); })
+      .then(res => { console.log(res.data); this.setState({ party: res.data }); return this.state.party })
+      .then(party => { return this._callChampAPI() })
       .catch(err => console.log(err));
+
+  }
+
+  _callChampAPI = () => {
+    //챔피언 정보 가져오기
+    axios.get("http://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
+      .then(res => {console.log(res.data.data); championInfo = res.data.data; return this._getChampId() })
+      .then(err => console.log(err));
+  }
+
+  //챔피언 키로부터 이름 가져오기
+  _getChampId = () => { 
+    const { party } = this.state;
+    for(var i = 0; i < 10; i++){
+        party.participants[i].championId += "";
+        for(var j in championInfo){
+            if(championInfo[j].key === party.participants[i].championId){
+                champions[i] = j;
+            }
+        }
+    }
   }
 
   _scanEvent = (data) => {
@@ -220,6 +245,7 @@ class App extends React.Component {
             <span className="Title">L O L - M I N I M A P - R E P L A Y</span>
             <div className="Map">
               <Itemlist
+              champName={champions}
               party={this.state.party}
               time={this.state.time}
               data={this.state.data}></Itemlist>
@@ -230,7 +256,7 @@ class App extends React.Component {
                     interval={this.interval}
                     data={this.state.data}
                     time={this.state.time}
-                    party={this.state.party.participants}></Summoner>
+                    party={champions}></Summoner>
                   {this._turretEvent()}
                 </Layer>
               </Stage>
@@ -238,6 +264,7 @@ class App extends React.Component {
                 timeline={this.state.timeline}
                 time={this.state.time}
                 gamelength={this.state.data.length - 1}
+                champName={champions}
                 party={this.state.party}></Timeline>
             </div>
             <div className="Score">

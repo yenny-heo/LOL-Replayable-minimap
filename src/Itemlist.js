@@ -4,9 +4,9 @@ let itemLists = [[], [], [], [], [], [], [], [], [], []];
 class Itemlist extends React.Component {
 
     _renderChampImg = () => {
-        const { party } = this.props;
-        return party.participants.map((data, i) => {
-            const imgsrc = `./icon/${data.championId}.png`
+        const { champName } = this.props;
+        return champName.map((data, i) => {
+            const imgsrc = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${data}.png`
             if(i < 5){
                 return <img className="ChampBlueIcon" src={imgsrc} alt="champ" key={i}></img>
             } else return <img className="ChampRedIcon" src={imgsrc} alt="champ" key={i}></img>

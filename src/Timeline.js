@@ -6,7 +6,7 @@ class Timeline extends React.Component {
 
 
     _loadTimeline = () => {
-        const { timeline, time, party } = this.props;
+        const { timeline, time, party, champName } = this.props;
         const timelinelist = timeline.slice(0).reverse().map((data, i) => {
             return data.map((t, j) => {
                 if (time < 99 - i) return null;
@@ -27,10 +27,8 @@ class Timeline extends React.Component {
                     }
                 }
                 else if (t.type === "CHAMPION_KILL") {
-                    let killerChamp = party.participants[t.killer - 1].championId;
-                    let victimChamp = party.participants[t.victim - 1].championId;
-                    let killerSrc = `./icon/${killerChamp}.png`
-                    let victimSrc = `./icon/${victimChamp}.png`
+                    let killerSrc = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${champName[t.killer - 1]}.png`
+                    let victimSrc = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${champName[t.victim - 1]}.png`
                     let killerName = party.participantIdentities[t.killer - 1].player.summonerName;
                     let victimName = party.participantIdentities[t.victim - 1].player.summonerName;
                     let killerClass, victimClass;
