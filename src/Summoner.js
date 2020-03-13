@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import { Group, Circle } from 'react-konva';
 
 const rad = 20;
@@ -14,29 +13,6 @@ class Summoner extends React.Component {
     componentDidMount() {
         this._summonerImage();
     }
-
-    // _callAPI = () => {
-    //     axios.get("http://ddragon.leagueoflegends.com/cdn/10.5.1/data/en_US/champion.json")
-    //     .then(res => {console.log(res.data.data); championInfo = res.data.data; return this._getChampId() })
-    //     .then(err => console.log(err));
-    // }
-
-    // _getChampId = () => { 
-    //     const { party } = this.props;
-    //     for(var i = 0; i < 10; i++){
-    //         party[i].championId += "";
-    //         for(var j in championInfo){
-    //             console.log(championInfo[j].key === party[i].championId);
-    //             if(championInfo[j].key === party[i].championId){
-    //                 console.log(j);
-    //                 images[i] = new Image();
-    //                 images[i].src = `http://ddragon.leagueoflegends.com/cdn/10.5.1/img/champion/${j}.png`;
-
-    //                 if(i === 9) images[i].onload = () => {this.setState({image: true})};
-    //             }
-    //         }
-    //     }
-    // }
 
     _summonerImage = () => {
         const { party } = this.props;

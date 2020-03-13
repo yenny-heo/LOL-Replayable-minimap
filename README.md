@@ -1,6 +1,7 @@
 # League of Legend Minimap Replay
 
 league of legend의 match Id를 통해, 미니맵으로 리플레이와 타임라인을 볼 수 있는 모듈입니다.
+리플레이는 1분단위로 제공됩니다.
 
 ## Getting Started
 
