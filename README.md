@@ -17,7 +17,7 @@ $ npm start
 
 ## Example of execution 
 
-![example](./image/example.png)
+![example](./image/example1.png)
 
 ## properties
 
